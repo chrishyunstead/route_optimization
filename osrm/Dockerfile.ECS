@@ -1,0 +1,15 @@
+FROM ghcr.io/project-osrm/osrm-backend:v5.27.1
+
+WORKDIR /data
+
+COPY car.lua /opt/car.lua
+COPY lib /opt/lib
+COPY south-korea-latest.osm.pbf /data/south-korea-latest.osm.pbf
+
+ENV LUA_PATH="/opt/lib/?.lua;;"
+
+RUN osrm-extract -p /opt/car.lua /data/south-korea-latest.osm.pbf && \
+    osrm-partition /data/south-korea-latest.osrm && \
+    osrm-customize /data/south-korea-latest.osrm
+
+CMD ["osrm-routed", "--algorithm", "mld", "--max-table-size", "200", "/data/south-korea-latest.osrm"]

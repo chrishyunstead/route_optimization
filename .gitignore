@@ -1,0 +1,38 @@
+# mac
+.DS_Store
+
+# python
+cache
+__pycache__
+.osrm_state
+.alns_cache
+
+# env
+.env
+tsp-route-optimization/.env
+optivenv/
+
+# OSRM generated artifacts
+tsp-route-optimization/osrm-data/*
+!.gitkeep
+
+# Big map inputs (권장: 레포에 안 올림)
+total_poly/*.osm.pbf
+
+# Big grid artifacts (권장: 레포에 안 올림)
+grid/*.feather
+grid/*.json
+grid/*.npz
+
+# shapefile set (보통 통째로 큼)
+total_poly/*.shp
+total_poly/*.shx
+total_poly/*.dbf
+total_poly/*.prj
+total_poly/*.cpg
+
+# outputs
+opti_test_visualization/*.html
+opti_test_csv/*.csv
+grid_traffic_output/*.csv
+*.pbf
