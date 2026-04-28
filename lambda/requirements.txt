@@ -1,0 +1,6 @@
+requests
+boto3
+pymysql
+pandas==2.2.3
+numpy==1.26.4
+alns==7.0.0

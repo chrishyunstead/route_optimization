@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: >
+  Route Optimization Lambda
+
+Globals:
+  Function:
+    Timeout: 900
+    MemorySize: 10240
+    Tracing: Active
+
+Parameters:
+  AccountEnv:
+    Type: String
+    Default: beta
+
+  PushOpsSG:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::SecurityGroup::Id>
+    Default: /PushOps/SG
+
+  PushOpsPrivateSubnet3:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Default: /PushOps/PrivateSubnet3
+
+  PushOpsPrivateSubnet4:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Subnet::Id>
+    Default: /PushOps/PrivateSubnet4
+  
+  ResultS3Bucket:
+    Type: String
+
+  ResultS3Prefix:
+    Type: String
+    Default: route-optimization-results
+
+  EtaCalculateFunctionName:
+    Type: String
+    Default: ""
+
+  EtaInvokeEnabled:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+
+Resources:
+  RouteOptInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt RouteOptimizationFunction.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${RouteOptRestApi}/*/POST/route-opt"
+
+  RouteOptRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref AccountEnv
+
+  RouteOptimizationFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+        DockerTag: route-optimization-v1.0
+        DockerContext: ./
+        Dockerfile: Dockerfile
+    Properties:
+      PackageType: Image
+      FunctionName: !Sub "${AWS::StackName}-lambda"
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - AWSLambdaVPCAccessExecutionRole
+        - AmazonSSMReadOnlyAccess
+        - S3WritePolicy:
+            BucketName: !Ref ResultS3Bucket
+        - LambdaInvokePolicy:
+            FunctionName: !Ref EtaCalculateFunctionName
+      Environment:
+        Variables:
+          ACCOUNT_ENV: !Ref AccountEnv
+          ALNS_CACHE_DIR: /tmp/.alns_cache
+          MPLCONFIGDIR: /tmp/matplotlib
+          RESULT_S3_BUCKET: !Ref ResultS3Bucket
+          RESULT_S3_PREFIX: !Ref ResultS3Prefix
+          ETA_CALCULATE_FUNCTION_NAME: !Ref EtaCalculateFunctionName
+          ETA_INVOKE_ENABLED: !Ref EtaInvokeEnabled
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref PushOpsSG
+        SubnetIds:
+          - !Ref PushOpsPrivateSubnet3
+          - !Ref PushOpsPrivateSubnet4
+      Events:
+        RouteOpt:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RouteOptRestApi
+            Path: /route-opt
+            Method: post
+
+  # ✅ (추가) Lambda Function URL (AuthType: NONE)
+  RouteOptimizationFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt RouteOptimizationFunction.Arn
+      AuthType: NONE
+      Cors:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - "POST"
+          - "GET"
+        AllowHeaders:
+          - "*"
+
+  # ✅ (추가) Function URL 호출 허용 권한
+  RouteOptimizationFunctionUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunctionUrl
+      FunctionName: !Ref RouteOptimizationFunction
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+Outputs:
+  RouteOptApiUrl:
+    Description: "REST API endpoint for Route Optimization"
+    Value: !Sub "https://${RouteOptRestApi}.execute-api.${AWS::Region}.amazonaws.com/${AccountEnv}/route-opt"
+
+  # ✅ (추가) Function URL 출력
+  RouteOptFunctionUrl:
+    Description: "Function URL endpoint for Route Optimization (Auth: NONE)"
+    Value: !GetAtt RouteOptimizationFunctionUrl.FunctionUrl
