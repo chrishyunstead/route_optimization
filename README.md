@@ -9,11 +9,11 @@
 
 ## Mobile App Result
 
-![App Screenshot](docs/images/app_route.png)
+![App Screenshot](./lambda/docs/images/app_route.png)
 
 ## Demo Video
 
-<video src="docs/demo.mp4" controls width="360"></video>
+<video src="./lambda/docs/demo.mp4" controls width="360"></video>
 
 ---
 
