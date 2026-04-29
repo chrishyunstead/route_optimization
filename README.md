@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="./lambda/docs/demo_small.mp4">▶ 압축 데모 영상 보기</a>
+  <a href="./lambda/docs/demo_tiny.mp4">▶ 압축 데모 영상 보기</a>
 </p>
 
 <p align="center">
