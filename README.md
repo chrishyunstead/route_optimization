@@ -9,13 +9,13 @@
 
 ### Route Optimization Result
 
-<p align="center">
+<!-- <p align="center">
   <img src="./lambda/docs/demo_preview.gif" width="320" alt="Route optimization demo preview">
 </p>
 
 <p align="center">
   <a href="./lambda/docs/demo_tiny.mp4">▶ 압축 데모 영상 보기</a>
-</p>
+</p> -->
 
 <p align="center">
   <img src="./lambda/docs/images/app_route.png" width="320" alt="Route Optimization App Screenshot">
