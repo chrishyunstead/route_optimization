@@ -1,16 +1,24 @@
+# Public example configuration. Copy this file to samconfig.toml and replace placeholders locally.
 version = 0.1
 
 [default.global.parameters]
 region = "ap-northeast-2"
 
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
 [default.deploy.parameters]
-stack_name = "sam-route-optimization"
+stack_name = "sam-route-optimization-sample"
 resolve_s3 = true
-s3_prefix = "sam-route-optimization"
+s3_prefix = "sam-route-optimization-sample"
 profile = "your-aws-profile"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "AccountEnv=\"dev\" PushOpsSG=\"/PushOps/SG\" PushOpsPrivateSubnet3=\"/PushOps/PrivateSubnet3\" PushOpsPrivateSubnet4=\"/PushOps/PrivateSubnet4\" ResultS3Bucket=\"your-result-bucket\" ResultS3Prefix=\"route-optimization\" EtaCalculateFunctionName=\"your-eta-calculate-lambda\" EtaInvokeEnabled=\"false\""
+parameter_overrides = "AccountEnv=\"dev\" PushOpsSG=\"/your-app/security-group\" PushOpsPrivateSubnet3=\"/your-app/private-subnet-3\" PushOpsPrivateSubnet4=\"/your-app/private-subnet-4\" ResultS3Bucket=\"your-result-bucket\" ResultS3Prefix=\"route-optimization\" EtaCalculateFunctionName=\"your-eta-calculate-lambda\" EtaInvokeEnabled=\"false\""
 image_repositories = [
   "RouteOptimizationFunction={account_id}.dkr.ecr.ap-northeast-2.amazonaws.com/sam-route-optimization/routeoptimizationfunction"
 ]
